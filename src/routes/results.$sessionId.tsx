@@ -72,7 +72,8 @@ function ResultsPage() {
 
   const topTool = TOOL_BY_ID[top.tool_id]!;
   const R = RISK[topTool.riskRating];
-  const confidence = Math.round((Number(top.score) / Math.max(1, Number(top.score))) * 100);
+  const maxScore = Math.max(1, ...recs.map((r) => Number(r.score)));
+  const confidence = Math.round((Number(top.score) / maxScore) * 100);
 
   return (
     <div className="min-h-screen bg-background print:bg-white">
