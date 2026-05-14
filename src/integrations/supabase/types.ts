@@ -14,7 +14,172 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      recommendations: {
+        Row: {
+          created_at: string
+          id: string
+          rank: number
+          reasoning: string | null
+          score: number
+          session_id: string
+          tool_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rank: number
+          reasoning?: string | null
+          score: number
+          session_id: string
+          tool_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rank?: number
+          reasoning?: string | null
+          score?: number
+          session_id?: string
+          tool_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_events: {
+        Row: {
+          answer_value: Json
+          created_at: string
+          id: string
+          node_id: string
+          question_id: string
+          session_id: string
+        }
+        Insert: {
+          answer_value: Json
+          created_at?: string
+          id?: string
+          node_id: string
+          question_id: string
+          session_id: string
+        }
+        Update: {
+          answer_value?: Json
+          created_at?: string
+          id?: string
+          node_id?: string
+          question_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          anticipated_benefits: string[] | null
+          completed_at: string | null
+          created_at: string
+          department: string | null
+          email: string | null
+          id: string
+          intent_text: string | null
+          job_function: string | null
+          main_use_case: string | null
+          started_at: string
+          user_id: string | null
+        }
+        Insert: {
+          anticipated_benefits?: string[] | null
+          completed_at?: string | null
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: string
+          intent_text?: string | null
+          job_function?: string | null
+          main_use_case?: string | null
+          started_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          anticipated_benefits?: string[] | null
+          completed_at?: string | null
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: string
+          intent_text?: string | null
+          job_function?: string | null
+          main_use_case?: string | null
+          started_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tools: {
+        Row: {
+          approved: boolean
+          capabilities: string[]
+          category: string
+          compliance_notes: string | null
+          cost_estimate: string | null
+          created_at: string
+          description: string | null
+          id: string
+          integrations: string[]
+          licensing: string | null
+          name: string
+          personas: string[]
+          risk_rating: string
+          use_cases: string[]
+        }
+        Insert: {
+          approved?: boolean
+          capabilities?: string[]
+          category: string
+          compliance_notes?: string | null
+          cost_estimate?: string | null
+          created_at?: string
+          description?: string | null
+          id: string
+          integrations?: string[]
+          licensing?: string | null
+          name: string
+          personas?: string[]
+          risk_rating?: string
+          use_cases?: string[]
+        }
+        Update: {
+          approved?: boolean
+          capabilities?: string[]
+          category?: string
+          compliance_notes?: string | null
+          cost_estimate?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          integrations?: string[]
+          licensing?: string | null
+          name?: string
+          personas?: string[]
+          risk_rating?: string
+          use_cases?: string[]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
