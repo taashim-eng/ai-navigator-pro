@@ -9,38 +9,82 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as NavigatorRouteImport } from './routes/navigator'
+import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ResultsSessionIdRouteImport } from './routes/results.$sessionId'
 
+const NavigatorRoute = NavigatorRouteImport.update({
+  id: '/navigator',
+  path: '/navigator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResultsSessionIdRoute = ResultsSessionIdRouteImport.update({
+  id: '/results/$sessionId',
+  path: '/results/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
+  '/navigator': typeof NavigatorRoute
+  '/results/$sessionId': typeof ResultsSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
+  '/navigator': typeof NavigatorRoute
+  '/results/$sessionId': typeof ResultsSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
+  '/navigator': typeof NavigatorRoute
+  '/results/$sessionId': typeof ResultsSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/catalog' | '/navigator' | '/results/$sessionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/catalog' | '/navigator' | '/results/$sessionId'
+  id: '__root__' | '/' | '/catalog' | '/navigator' | '/results/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CatalogRoute: typeof CatalogRoute
+  NavigatorRoute: typeof NavigatorRoute
+  ResultsSessionIdRoute: typeof ResultsSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/navigator': {
+      id: '/navigator'
+      path: '/navigator'
+      fullPath: '/navigator'
+      preLoaderRoute: typeof NavigatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalog': {
+      id: '/catalog'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof CatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +92,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/results/$sessionId': {
+      id: '/results/$sessionId'
+      path: '/results/$sessionId'
+      fullPath: '/results/$sessionId'
+      preLoaderRoute: typeof ResultsSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CatalogRoute: CatalogRoute,
+  NavigatorRoute: NavigatorRoute,
+  ResultsSessionIdRoute: ResultsSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
