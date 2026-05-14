@@ -98,6 +98,10 @@ export type Database = {
           intent_text: string | null
           job_function: string | null
           main_use_case: string | null
+          manager_email: string | null
+          snow_task_number: string | null
+          snow_task_state: string | null
+          snow_user_sys_id: string | null
           started_at: string
           user_id: string | null
         }
@@ -111,6 +115,10 @@ export type Database = {
           intent_text?: string | null
           job_function?: string | null
           main_use_case?: string | null
+          manager_email?: string | null
+          snow_task_number?: string | null
+          snow_task_state?: string | null
+          snow_user_sys_id?: string | null
           started_at?: string
           user_id?: string | null
         }
@@ -124,8 +132,54 @@ export type Database = {
           intent_text?: string | null
           job_function?: string | null
           main_use_case?: string | null
+          manager_email?: string | null
+          snow_task_number?: string | null
+          snow_task_state?: string | null
+          snow_user_sys_id?: string | null
           started_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      snow_tasks: {
+        Row: {
+          assigned_to_email: string | null
+          assignment_group: string
+          created_at: string
+          description: string | null
+          id: string
+          payload: Json
+          session_id: string
+          short_description: string
+          state: string
+          sys_id: string
+          task_number: string
+        }
+        Insert: {
+          assigned_to_email?: string | null
+          assignment_group?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          payload?: Json
+          session_id: string
+          short_description: string
+          state?: string
+          sys_id: string
+          task_number: string
+        }
+        Update: {
+          assigned_to_email?: string | null
+          assignment_group?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          payload?: Json
+          session_id?: string
+          short_description?: string
+          state?: string
+          sys_id?: string
+          task_number?: string
         }
         Relationships: []
       }
