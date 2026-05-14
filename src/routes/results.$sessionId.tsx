@@ -13,6 +13,7 @@ import {
   PlugZap,
   AlertTriangle,
   ListChecks,
+  Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,7 @@ function ResultsPage() {
 
   const session = data?.session;
   const recs = (data?.recommendations ?? []).filter((r) => TOOL_BY_ID[r.tool_id]);
+  const snowTask = data?.snowTask ?? null;
   const top = recs[0];
   const alternatives = recs.slice(1, 4);
 
@@ -121,6 +123,38 @@ function ResultsPage() {
           </div>
         </motion.div>
 
+        {snowTask && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5"
+          >
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-primary/10 p-2 text-primary">
+                <Ticket className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                  ServiceNow task created
+                </div>
+                <div className="mt-0.5 text-lg font-semibold">
+                  {snowTask.task_number}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {snowTask.short_description}
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  Assigned to {snowTask.assignment_group} · State: {snowTask.state}
+                </div>
+              </div>
+            </div>
+            <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+              Mock — wire to live SNOW later
+            </Badge>
+          </motion.div>
+        )}
+
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <Block icon={TrendingUp} title="Estimated productivity impact">
             Based on your stated benefits ({(session.anticipated_benefits ?? []).join(", ") || "—"}),
@@ -179,6 +213,12 @@ function ResultsPage() {
             <div><span className="text-muted-foreground">Department:</span> {session.department}</div>
             <div><span className="text-muted-foreground">Job function:</span> {session.job_function}</div>
             <div><span className="text-muted-foreground">Use case:</span> {session.main_use_case}</div>
+            {session.manager_email && (
+              <div><span className="text-muted-foreground">Manager:</span> {session.manager_email}</div>
+            )}
+            {session.snow_user_sys_id && (
+              <div><span className="text-muted-foreground">SNOW user:</span> {session.snow_user_sys_id}</div>
+            )}
           </div>
         </section>
       </main>
