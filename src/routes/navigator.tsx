@@ -13,7 +13,7 @@ import {
   Position,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ArrowLeft, Sparkles, User, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Sparkles, User, CheckCircle2, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ import {
   updateIdentity,
   recordEvent,
   finalizeSession,
+  lookupSnowUser,
 } from "@/lib/navigator.functions";
 
 export const Route = createFileRoute("/navigator")({
@@ -79,6 +80,7 @@ function Navigator() {
   const updateIdFn = useServerFn(updateIdentity);
   const recordFn = useServerFn(recordEvent);
   const finalizeFn = useServerFn(finalizeSession);
+  const snowLookupFn = useServerFn(lookupSnowUser);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [state, setState] = useState<SessionState>({
@@ -237,6 +239,10 @@ function Navigator() {
                   <IdentityForm
                     initial={state.identity}
                     onSubmit={handleIdentity}
+                    onLookup={async (email) => {
+                      const r = await snowLookupFn({ data: { email } });
+                      return r.user;
+                    }}
                   />
                 )}
 
