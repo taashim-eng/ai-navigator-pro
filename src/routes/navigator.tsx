@@ -13,7 +13,7 @@ import {
   Position,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ArrowLeft, Sparkles, User, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Sparkles, User, CheckCircle2, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ import {
   updateIdentity,
   recordEvent,
   finalizeSession,
+  lookupSnowUser,
 } from "@/lib/navigator.functions";
 
 export const Route = createFileRoute("/navigator")({
@@ -79,6 +80,7 @@ function Navigator() {
   const updateIdFn = useServerFn(updateIdentity);
   const recordFn = useServerFn(recordEvent);
   const finalizeFn = useServerFn(finalizeSession);
+  const snowLookupFn = useServerFn(lookupSnowUser);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [state, setState] = useState<SessionState>({
@@ -237,6 +239,10 @@ function Navigator() {
                   <IdentityForm
                     initial={state.identity}
                     onSubmit={handleIdentity}
+                    onLookup={async (email) => {
+                      const r = await snowLookupFn({ data: { email } });
+                      return r.user;
+                    }}
                   />
                 )}
 
@@ -310,27 +316,103 @@ function Navigator() {
 function IdentityForm({
   initial,
   onSubmit,
+  onLookup,
 }: {
   initial: SessionState["identity"];
   onSubmit: (id: SessionState["identity"]) => void;
+  onLookup: (email: string) => Promise<{
+    sysId: string;
+    name: string;
+    department: string;
+    jobFunction: string;
+    managerEmail: string | null;
+  } | null>;
 }) {
   const [email, setEmail] = useState(initial.email ?? "");
   const [department, setDepartment] = useState(initial.department ?? "");
   const [jobFunction, setJobFunction] = useState(initial.jobFunction ?? "");
+  const [lookupBusy, setLookupBusy] = useState(false);
+  const [lookupHit, setLookupHit] = useState<null | { name: string; managerEmail: string | null }>(null);
+  const [lookupError, setLookupError] = useState<string | null>(null);
   const valid = /.+@.+\..+/.test(email) && department && jobFunction;
+  const emailValid = /.+@.+\..+/.test(email);
+
+  async function handleLookup() {
+    if (!emailValid) return;
+    setLookupBusy(true);
+    setLookupError(null);
+    try {
+      const u = await onLookup(email);
+      if (!u) {
+        setLookupError("No directory match — fill in your details below.");
+        setLookupHit(null);
+        return;
+      }
+      setDepartment(u.department);
+      setJobFunction(u.jobFunction);
+      setLookupHit({ name: u.name, managerEmail: u.managerEmail });
+    } catch {
+      setLookupError("ServiceNow lookup failed. Fill in your details below.");
+    } finally {
+      setLookupBusy(false);
+    }
+  }
 
   return (
     <div className="space-y-3">
+      <button
+        type="button"
+        disabled
+        title="Entra ID SAML SSO will be wired up by IT"
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed bg-muted/40 px-4 py-2.5 text-sm text-muted-foreground"
+      >
+        <ShieldCheck className="h-4 w-4" /> Sign in with Entra ID
+        <span className="ml-1 rounded-full border bg-background px-2 py-0.5 text-[10px] uppercase tracking-wide">
+          Coming soon
+        </span>
+      </button>
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+        <span className="h-px flex-1 bg-border" /> or look up via ServiceNow{" "}
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
       <div>
         <Label htmlFor="email">Work email</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="you@company.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1"
-        />
+        <div className="mt-1 flex gap-2">
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@company.com"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setLookupHit(null);
+              setLookupError(null);
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!emailValid || lookupBusy}
+            onClick={handleLookup}
+          >
+            <Search className="mr-1.5 h-4 w-4" />
+            {lookupBusy ? "Looking up…" : "Look up"}
+          </Button>
+        </div>
+        {lookupHit && (
+          <div className="mt-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground">
+            <div className="font-medium">ServiceNow match: {lookupHit.name}</div>
+            {lookupHit.managerEmail && (
+              <div className="text-muted-foreground">
+                Reports to {lookupHit.managerEmail}
+              </div>
+            )}
+          </div>
+        )}
+        {lookupError && (
+          <div className="mt-2 text-xs text-muted-foreground">{lookupError}</div>
+        )}
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
