@@ -6,6 +6,32 @@ import {
   lookupSnowUserByEmail,
 } from "@/lib/integrations/servicenow.mock";
 
+type AuditEntry = {
+  sessionId?: string | null;
+  actorEmail?: string | null;
+  actorIdentity?: string;
+  entityType: string;
+  entityId?: string | null;
+  action: string;
+  metadata?: Record<string, unknown>;
+};
+
+async function writeAudit(entry: AuditEntry) {
+  try {
+    await supabaseAdmin.from("audit_logs").insert({
+      session_id: entry.sessionId ?? null,
+      actor_email: entry.actorEmail ?? null,
+      actor_identity: entry.actorIdentity ?? "anonymous",
+      entity_type: entry.entityType,
+      entity_id: entry.entityId ?? null,
+      action: entry.action,
+      metadata: (entry.metadata ?? {}) as never,
+    });
+  } catch (err) {
+    console.error("[audit_logs] write failed", err);
+  }
+}
+
 const identitySchema = z.object({
   sessionId: z.string().uuid(),
   email: z.string().trim().email().max(255),
@@ -48,6 +74,12 @@ export const startSession = createServerFn({ method: "POST" }).handler(async () 
     .select("id")
     .single();
   if (error) throw new Error(error.message);
+  await writeAudit({
+    sessionId: data.id as string,
+    entityType: "session",
+    entityId: data.id as string,
+    action: "create",
+  });
   return { sessionId: data.id as string };
 });
 
@@ -66,6 +98,19 @@ export const updateIdentity = createServerFn({ method: "POST" })
       })
       .eq("id", data.sessionId);
     if (error) throw new Error(error.message);
+    await writeAudit({
+      sessionId: data.sessionId,
+      actorEmail: data.email,
+      actorIdentity: snow ? "servicenow_sys_user" : "self_reported",
+      entityType: "session",
+      entityId: data.sessionId,
+      action: "update_identity",
+      metadata: {
+        department: data.department,
+        jobFunction: data.jobFunction,
+        snowSysId: snow?.sysId ?? null,
+      },
+    });
     return { ok: true };
   });
 
@@ -135,6 +180,35 @@ export const finalizeSession = createServerFn({ method: "POST" })
     const requesterName =
       requesterEmail.split("@")[0]?.replace(/[._-]+/g, " ") ?? "AI Requester";
 
+    const actorIdentity = session?.snow_user_sys_id
+      ? "servicenow_sys_user"
+      : "self_reported";
+
+    await writeAudit({
+      sessionId: data.sessionId,
+      actorEmail: requesterEmail,
+      actorIdentity,
+      entityType: "session",
+      entityId: data.sessionId,
+      action: "finalize",
+      metadata: {
+        mainUseCase: data.mainUseCase,
+        anticipatedBenefits: data.anticipatedBenefits,
+      },
+    });
+
+    for (const r of data.recommendations) {
+      await writeAudit({
+        sessionId: data.sessionId,
+        actorEmail: requesterEmail,
+        actorIdentity,
+        entityType: "recommendation",
+        entityId: r.toolId,
+        action: "create",
+        metadata: { score: r.score, rank: r.rank },
+      });
+    }
+
     const task = createMockSnowTask({
       sessionId: data.sessionId,
       requesterEmail,
@@ -168,6 +242,21 @@ export const finalizeSession = createServerFn({ method: "POST" })
         recommendations: data.recommendations,
         anticipatedBenefits: data.anticipatedBenefits,
         mainUseCase: data.mainUseCase,
+      },
+    });
+
+    await writeAudit({
+      sessionId: data.sessionId,
+      actorEmail: requesterEmail,
+      actorIdentity,
+      entityType: "snow_task",
+      entityId: task.taskNumber,
+      action: "create",
+      metadata: {
+        sysId: task.sysId,
+        state: task.state,
+        assignmentGroup: task.assignmentGroup,
+        topToolId,
       },
     });
 
