@@ -614,3 +614,70 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
 
   return { nodes, edges };
 }
+
+// ── Reasoning commentary ─────────────────────────────────────────────────
+type Commentary = { id: string; label: string; text: string };
+type Ranked = ReturnType<typeof rankTools>;
+
+function buildCommentary(state: SessionState, ranked: Ranked): Commentary[] {
+  const out: Commentary[] = [];
+
+  if (state.identity.email && state.identity.jobFunction) {
+    out.push({
+      id: "c-identity",
+      label: "Anchoring",
+      text: `Profiling tools approved for a ${state.identity.jobFunction} in ${state.identity.department}.`,
+    });
+  }
+
+  const useCase = state.answers.main_use_case;
+  if (useCase) {
+    const q = QUESTION_BY_ID["main_use_case"];
+    const label = q?.options?.find((o) => o.value === useCase)?.label ?? String(useCase);
+    out.push({
+      id: "c-use-case",
+      label: "Filtering",
+      text: `Narrowing the catalog to tools built for "${label}".`,
+    });
+  }
+
+  const benefits = state.answers.anticipated_benefits;
+  if (Array.isArray(benefits) && benefits.length) {
+    out.push({
+      id: "c-benefits",
+      label: "Weighting",
+      text: `Boosting tools that deliver ${benefits.slice(0, 2).join(" and ")}${benefits.length > 2 ? " (+more)" : ""}.`,
+    });
+  }
+
+  const sensitivity = state.answers.data_sensitivity;
+  if (sensitivity && sensitivity !== "public") {
+    out.push({
+      id: "c-risk",
+      label: "Governance",
+      text: `Restricting to options cleared for ${String(sensitivity).replace(/_/g, " ")} data.`,
+    });
+  }
+
+  const top = ranked[0];
+  const second = ranked[1];
+  if (top && top.score > 0) {
+    const tags = top.matchedTags.slice(0, 3).map((t) => t.replace(/_/g, " "));
+    out.push({
+      id: `c-top-${top.tool.id}`,
+      label: "Top match",
+      text: tags.length
+        ? `${top.tool.name} leads — strong fit on ${tags.join(", ")}.`
+        : `${top.tool.name} is currently the best fit.`,
+    });
+    if (second && second.score > 0 && top.score - second.score < 1.5) {
+      out.push({
+        id: `c-close-${second.tool.id}`,
+        label: "Close call",
+        text: `${second.tool.name} is close behind — a few more answers will break the tie.`,
+      });
+    }
+  }
+
+  return out.slice(-4);
+}
