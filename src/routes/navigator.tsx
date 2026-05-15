@@ -60,12 +60,12 @@ function MapNode({ data }: { data: NodeData }) {
     data.kind === "rec" ? { background: "var(--gradient-primary)" } : undefined;
   return (
     <div
-      className={`min-w-[180px] max-w-[260px] rounded-xl border px-4 py-3 text-sm ${styles[data.kind]}`}
+      className={`min-w-[120px] max-w-[180px] rounded-lg border px-2.5 py-1.5 text-[11px] leading-tight ${styles[data.kind]}`}
       style={wrapStyle}
     >
       <Handle type="target" position={Position.Top} className="!opacity-0" />
-      {data.sub && <div className="mb-1 text-[10px] uppercase tracking-wide opacity-70">{data.sub}</div>}
-      <div className="font-medium">{data.label}</div>
+      {data.sub && <div className="mb-0.5 text-[9px] uppercase tracking-wide opacity-70">{data.sub}</div>}
+      <div className="font-medium line-clamp-2">{data.label}</div>
       <Handle type="source" position={Position.Bottom} className="!opacity-0" />
     </div>
   );
