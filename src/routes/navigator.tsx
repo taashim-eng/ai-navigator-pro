@@ -13,7 +13,7 @@ import {
   Position,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ArrowLeft, Sparkles, User, CheckCircle2, Search, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Sparkles, User, CheckCircle2, Search, ShieldCheck, MessageCircle, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -114,6 +114,7 @@ function Navigator() {
 
   // Build mind-map nodes/edges from state
   const { nodes, edges } = useMemo(() => buildGraph(state, currentQid), [state, currentQid]);
+  const commentary = useMemo(() => buildCommentary(state, ranked), [state, ranked]);
 
   async function handleAnswer(qid: string, value: AnswerValue) {
     setState((s) => ({ ...s, answers: { ...s.answers, [qid]: value } }));
@@ -187,9 +188,9 @@ function Navigator() {
         </div>
       </header>
 
-      <div className="grid flex-1 grid-cols-1 lg:grid-cols-[1fr_420px]">
-        {/* Mind map */}
-        <div className="relative border-r">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Mind map (top) */}
+        <div className="relative flex-1 min-h-0">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -214,10 +215,35 @@ function Navigator() {
               <div className="text-xs text-muted-foreground">{top.tool.category}</div>
             </div>
           )}
+
+          {/* Reasoning commentary bubbles */}
+          <div className="pointer-events-none absolute left-4 top-4 flex max-w-sm flex-col gap-2">
+            <AnimatePresence initial={false}>
+              {commentary.map((c: Commentary) => (
+                <motion.div
+                  key={c.id}
+                  initial={{ opacity: 0, x: -16, scale: 0.96 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -16, scale: 0.96 }}
+                  transition={{ duration: 0.25 }}
+                  className="pointer-events-auto rounded-2xl rounded-tl-sm border bg-card/90 px-3 py-2 text-xs shadow-[var(--shadow-elegant)] backdrop-blur"
+                >
+                  <div className="mb-0.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-primary">
+                    <Brain className="h-3 w-3" /> {c.label}
+                  </div>
+                  <div className="text-foreground/90 leading-snug">{c.text}</div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Side panel: active question */}
-        <aside className="flex flex-col overflow-y-auto p-6">
+        {/* Bottom dock: active question / chat */}
+        <aside className="flex max-h-[44vh] min-h-[260px] flex-col overflow-y-auto border-t bg-card/30 px-6 py-5">
+          <div className="mx-auto w-full max-w-3xl">
+          <div className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+            <MessageCircle className="h-3.5 w-3.5" /> Navigator
+          </div>
           <AnimatePresence mode="wait">
             {currentQ ? (
               <motion.div
@@ -306,6 +332,7 @@ function Navigator() {
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
         </aside>
       </div>
     </div>
@@ -586,4 +613,71 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
   }
 
   return { nodes, edges };
+}
+
+// ── Reasoning commentary ─────────────────────────────────────────────────
+type Commentary = { id: string; label: string; text: string };
+type Ranked = ReturnType<typeof rankTools>;
+
+function buildCommentary(state: SessionState, ranked: Ranked): Commentary[] {
+  const out: Commentary[] = [];
+
+  if (state.identity.email && state.identity.jobFunction) {
+    out.push({
+      id: "c-identity",
+      label: "Anchoring",
+      text: `Profiling tools approved for a ${state.identity.jobFunction} in ${state.identity.department}.`,
+    });
+  }
+
+  const useCase = state.answers.main_use_case;
+  if (useCase) {
+    const q = QUESTION_BY_ID["main_use_case"];
+    const label = q?.options?.find((o) => o.value === useCase)?.label ?? String(useCase);
+    out.push({
+      id: "c-use-case",
+      label: "Filtering",
+      text: `Narrowing the catalog to tools built for "${label}".`,
+    });
+  }
+
+  const benefits = state.answers.anticipated_benefits;
+  if (Array.isArray(benefits) && benefits.length) {
+    out.push({
+      id: "c-benefits",
+      label: "Weighting",
+      text: `Boosting tools that deliver ${benefits.slice(0, 2).join(" and ")}${benefits.length > 2 ? " (+more)" : ""}.`,
+    });
+  }
+
+  const sensitivity = state.answers.data_sensitivity;
+  if (sensitivity && sensitivity !== "public") {
+    out.push({
+      id: "c-risk",
+      label: "Governance",
+      text: `Restricting to options cleared for ${String(sensitivity).replace(/_/g, " ")} data.`,
+    });
+  }
+
+  const top = ranked[0];
+  const second = ranked[1];
+  if (top && top.score > 0) {
+    const tags = top.matchedTags.slice(0, 3).map((t) => t.replace(/_/g, " "));
+    out.push({
+      id: `c-top-${top.tool.id}`,
+      label: "Top match",
+      text: tags.length
+        ? `${top.tool.name} leads — strong fit on ${tags.join(", ")}.`
+        : `${top.tool.name} is currently the best fit.`,
+    });
+    if (second && second.score > 0 && top.score - second.score < 1.5) {
+      out.push({
+        id: `c-close-${second.tool.id}`,
+        label: "Close call",
+        text: `${second.tool.name} is close behind — a few more answers will break the tie.`,
+      });
+    }
+  }
+
+  return out.slice(-4);
 }
