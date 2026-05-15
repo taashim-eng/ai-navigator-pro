@@ -357,6 +357,7 @@ function Navigator() {
               )}
             </AnimatePresence>
           </div>
+          </div>
         </aside>
       </div>
     </div>
