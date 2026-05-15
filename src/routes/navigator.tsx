@@ -196,7 +196,7 @@ function Navigator() {
             edges={edges}
             nodeTypes={nodeTypes}
             fitView
-            fitViewOptions={{ padding: 0.3 }}
+            fitViewOptions={{ padding: 0.5 }}
             proOptions={{ hideAttribution: true }}
             nodesDraggable
             zoomOnScroll
