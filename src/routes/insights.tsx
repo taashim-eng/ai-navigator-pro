@@ -474,7 +474,7 @@ function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl border bg-card p-5 shadow-[var(--shadow-elegant)] ${className ?? ""}`}
+      className={`min-w-0 rounded-2xl border bg-card p-5 shadow-[var(--shadow-elegant)] ${className ?? ""}`}
     >
       <div className="mb-4 flex items-baseline justify-between">
         <div className="text-sm font-medium">{title}</div>
