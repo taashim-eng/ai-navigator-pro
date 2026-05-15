@@ -520,6 +520,7 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
   const edges: Edge[] = [];
   let y = 0;
   const xCenter = 0;
+  const STEP = 80;
 
   nodes.push({
     id: "root",
@@ -532,7 +533,7 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
 
   // Identity node
   if (state.identity.email) {
-    y += 130;
+    y += STEP;
     const id = "n-identity";
     nodes.push({
       id,
@@ -553,12 +554,12 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     if (q.type === "identity") continue;
     const ans = state.answers[q.id];
     if (ans === undefined) continue;
-    y += 130;
+    y += STEP;
     const qNodeId = `q-${q.id}`;
     nodes.push({
       id: qNodeId,
       type: "map",
-      position: { x: xCenter - 140, y },
+      position: { x: xCenter - 110, y },
       data: { label: q.prompt, sub: q.category, kind: "question" },
     });
     edges.push({ id: `e-${prevId}-${qNodeId}`, source: prevId, target: qNodeId, animated: true });
@@ -571,7 +572,7 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id: aNodeId,
       type: "map",
-      position: { x: xCenter + 160, y },
+      position: { x: xCenter + 110, y },
       data: { label: labels.join(", "), sub: "Your answer", kind: "answer" },
     });
     edges.push({ id: `e-${qNodeId}-${aNodeId}`, source: qNodeId, target: aNodeId, animated: true });
@@ -582,7 +583,7 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
   if (currentQid && currentQid !== "identity") {
     const q = QUESTION_BY_ID[currentQid];
     if (q && state.answers[q.id] === undefined) {
-      y += 130;
+      y += STEP;
       const qNodeId = `q-${q.id}-pending`;
       nodes.push({
         id: qNodeId,
@@ -600,7 +601,7 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id: "rec",
       type: "map",
-      position: { x: xCenter + 360, y: 0 },
+      position: { x: xCenter + 280, y: 0 },
       data: { label: top.tool.name, sub: "Live recommendation", kind: "rec" },
     });
     edges.push({
