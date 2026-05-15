@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as NavigatorRouteImport } from './routes/navigator'
+import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultsSessionIdRouteImport } from './routes/results.$sessionId'
@@ -17,6 +18,11 @@ import { Route as ResultsSessionIdRouteImport } from './routes/results.$sessionI
 const NavigatorRoute = NavigatorRouteImport.update({
   id: '/navigator',
   path: '/navigator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogRoute = CatalogRouteImport.update({
@@ -38,12 +44,14 @@ const ResultsSessionIdRoute = ResultsSessionIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/insights': typeof InsightsRoute
   '/navigator': typeof NavigatorRoute
   '/results/$sessionId': typeof ResultsSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/insights': typeof InsightsRoute
   '/navigator': typeof NavigatorRoute
   '/results/$sessionId': typeof ResultsSessionIdRoute
 }
@@ -51,20 +59,33 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/insights': typeof InsightsRoute
   '/navigator': typeof NavigatorRoute
   '/results/$sessionId': typeof ResultsSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/catalog' | '/navigator' | '/results/$sessionId'
+  fullPaths:
+    | '/'
+    | '/catalog'
+    | '/insights'
+    | '/navigator'
+    | '/results/$sessionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/catalog' | '/navigator' | '/results/$sessionId'
-  id: '__root__' | '/' | '/catalog' | '/navigator' | '/results/$sessionId'
+  to: '/' | '/catalog' | '/insights' | '/navigator' | '/results/$sessionId'
+  id:
+    | '__root__'
+    | '/'
+    | '/catalog'
+    | '/insights'
+    | '/navigator'
+    | '/results/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CatalogRoute: typeof CatalogRoute
+  InsightsRoute: typeof InsightsRoute
   NavigatorRoute: typeof NavigatorRoute
   ResultsSessionIdRoute: typeof ResultsSessionIdRoute
 }
@@ -76,6 +97,13 @@ declare module '@tanstack/react-router' {
       path: '/navigator'
       fullPath: '/navigator'
       preLoaderRoute: typeof NavigatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalog': {
@@ -105,6 +133,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CatalogRoute: CatalogRoute,
+  InsightsRoute: InsightsRoute,
   NavigatorRoute: NavigatorRoute,
   ResultsSessionIdRoute: ResultsSessionIdRoute,
 }

@@ -92,9 +92,14 @@ function Landing() {
           </div>
           <span className="font-semibold tracking-tight">AI Solution Navigator</span>
         </div>
-        <Link to="/catalog" className="text-sm text-muted-foreground hover:text-foreground">
-          Approved tools
-        </Link>
+        <nav className="flex items-center gap-5 text-sm text-muted-foreground">
+          <Link to="/catalog" className="hover:text-foreground">
+            Approved tools
+          </Link>
+          <Link to="/insights" className="hover:text-foreground">
+            Insights
+          </Link>
+        </nav>
       </header>
 
       <main className="relative z-10 mx-auto max-w-4xl px-6 pt-16 pb-24 text-center">
