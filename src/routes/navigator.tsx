@@ -219,7 +219,7 @@ function Navigator() {
           {/* Reasoning commentary bubbles */}
           <div className="pointer-events-none absolute left-4 top-4 flex max-w-sm flex-col gap-2">
             <AnimatePresence initial={false}>
-              {commentary.map((c) => (
+              {commentary.map((c: Commentary) => (
                 <motion.div
                   key={c.id}
                   initial={{ opacity: 0, x: -16, scale: 0.96 }}
