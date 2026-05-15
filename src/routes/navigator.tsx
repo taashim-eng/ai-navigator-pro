@@ -239,99 +239,123 @@ function Navigator() {
         </div>
 
         {/* Bottom dock: active question / chat */}
-        <aside className="flex max-h-[44vh] min-h-[260px] flex-col overflow-y-auto border-t bg-card/30 px-6 py-5">
-          <div className="mx-auto w-full max-w-3xl">
-          <div className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
-            <MessageCircle className="h-3.5 w-3.5" /> Navigator
-          </div>
+        <aside className="flex max-h-[34vh] min-h-[220px] flex-col overflow-hidden border-t bg-card/30 px-6 py-4">
+          <div className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <AnimatePresence mode="wait">
             {currentQ ? (
               <motion.div
-                key={currentQ.id}
+                key={currentQ.id + "-prompt"}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-2"
               >
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                  {currentQ.category}
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <MessageCircle className="h-3.5 w-3.5" /> Navigator · {currentQ.category}
                 </div>
-                <h2 className="text-2xl font-semibold leading-tight">{currentQ.prompt}</h2>
+                <h2 className="text-lg font-semibold leading-snug">{currentQ.prompt}</h2>
                 {currentQ.helper && (
-                  <p className="text-sm text-muted-foreground">{currentQ.helper}</p>
-                )}
-
-                {currentQ.type === "identity" && (
-                  <IdentityForm
-                    initial={state.identity}
-                    onSubmit={handleIdentity}
-                    onLookup={async (email) => {
-                      const r = await snowLookupFn({ data: { email } });
-                      return r.user;
-                    }}
-                  />
-                )}
-
-                {currentQ.type === "single" && currentQ.options && (
-                  <div className="grid gap-2">
-                    {currentQ.options.map((o) => (
-                      <button
-                        key={o.value}
-                        onClick={() => handleAnswer(currentQ.id, o.value)}
-                        className="rounded-lg border bg-card px-4 py-3 text-left text-sm transition hover:border-primary hover:shadow-[var(--shadow-elegant)]"
-                      >
-                        {o.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {currentQ.type === "multi" && currentQ.options && (
-                  <MultiChips
-                    options={currentQ.options}
-                    onConfirm={(vals) => handleAnswer(currentQ.id, vals)}
-                  />
+                  <p className="text-xs text-muted-foreground">{currentQ.helper}</p>
                 )}
               </motion.div>
             ) : (
               <motion.div
-                key="done"
+                key="done-prompt"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="space-y-4"
+                className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-2"
               >
-                <CheckCircle2 className="h-8 w-8 text-primary" />
-                <h2 className="text-2xl font-semibold">Ready for your recommendation</h2>
-                <p className="text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <MessageCircle className="h-3.5 w-3.5" /> Navigator
+                </div>
+                <CheckCircle2 className="h-6 w-6 text-primary" />
+                <h2 className="text-lg font-semibold">Ready for your recommendation</h2>
+                <p className="text-xs text-muted-foreground">
                   We've matched your answers against the approved catalog.
                 </p>
                 {top && (
-                  <div className="rounded-xl border bg-card p-4">
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                  <div className="rounded-lg border bg-card p-3">
+                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
                       Top match
                     </div>
-                    <div className="mt-1 font-semibold">{top.tool.name}</div>
-                    <p className="mt-1 text-sm text-muted-foreground">{top.reasoning}</p>
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {top.matchedTags.slice(0, 4).map((t) => (
+                    <div className="mt-0.5 text-sm font-semibold">{top.tool.name}</div>
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{top.reasoning}</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Right column: answer options */}
+          <div className="flex min-h-0 flex-col overflow-y-auto">
+            <AnimatePresence mode="wait">
+              {currentQ ? (
+                <motion.div
+                  key={currentQ.id + "-opts"}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  className="space-y-3"
+                >
+                  {currentQ.type === "identity" && (
+                    <IdentityForm
+                      initial={state.identity}
+                      onSubmit={handleIdentity}
+                      onLookup={async (email) => {
+                        const r = await snowLookupFn({ data: { email } });
+                        return r.user;
+                      }}
+                    />
+                  )}
+
+                  {currentQ.type === "single" && currentQ.options && (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {currentQ.options.map((o) => (
+                        <button
+                          key={o.value}
+                          onClick={() => handleAnswer(currentQ.id, o.value)}
+                          className="rounded-lg border bg-card px-3 py-2 text-left text-sm transition hover:border-primary hover:shadow-[var(--shadow-elegant)]"
+                        >
+                          {o.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {currentQ.type === "multi" && currentQ.options && (
+                    <MultiChips
+                      options={currentQ.options}
+                      onConfirm={(vals) => handleAnswer(currentQ.id, vals)}
+                    />
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="done-opts"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex h-full flex-col justify-center"
+                >
+                  {top && (
+                    <div className="mb-3 flex flex-wrap gap-1">
+                      {top.matchedTags.slice(0, 6).map((t) => (
                         <Badge key={t} variant="secondary" className="text-[10px]">
                           {t.replace(/_/g, " ")}
                         </Badge>
                       ))}
                     </div>
-                  </div>
-                )}
-                <Button
-                  className="w-full"
-                  size="lg"
-                  disabled={submitting || !sessionId}
-                  onClick={handleFinish}
-                >
-                  {submitting ? "Saving…" : "See full recommendation"}
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  )}
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    disabled={submitting || !sessionId}
+                    onClick={handleFinish}
+                  >
+                    {submitting ? "Saving…" : "See full recommendation"}
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </aside>
       </div>
