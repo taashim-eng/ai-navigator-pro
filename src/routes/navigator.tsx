@@ -239,8 +239,8 @@ function Navigator() {
         </div>
 
         {/* Bottom dock: active question / chat */}
-        <aside className="flex max-h-[34vh] min-h-[220px] flex-col overflow-hidden border-t bg-card/30 px-6 py-4">
-          <div className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <aside className="flex max-h-[28vh] min-h-[180px] flex-col overflow-hidden border-t bg-card/30 px-4 py-3">
+          <div className="mx-auto grid w-full max-w-none flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
           <AnimatePresence mode="wait">
             {currentQ ? (
               <motion.div
