@@ -241,7 +241,7 @@ function Navigator() {
         </div>
 
         {/* Bottom dock: active question / chat */}
-        <aside className="flex max-h-[22vh] min-h-[150px] flex-col overflow-hidden border-t bg-card/30 px-4 py-2">
+        <aside className="flex max-h-[34vh] min-h-[240px] flex-col overflow-hidden border-t bg-card/30 px-4 py-3">
           <div className="mx-auto grid w-full max-w-none flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
           <AnimatePresence mode="wait">
             {currentQ ? (
