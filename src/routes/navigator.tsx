@@ -241,7 +241,13 @@ function Navigator() {
         </div>
 
         {/* Bottom dock: active question / chat */}
-        <aside className="flex max-h-[44vh] min-h-[320px] flex-col overflow-hidden border-t bg-card/30 px-4 py-3">
+        <aside
+          className={`flex flex-col overflow-hidden border-t bg-card/30 px-4 py-3 transition-[max-height,min-height] duration-300 ease-out ${
+            state.identity.email
+              ? "max-h-[35vh] min-h-[256px]"
+              : "max-h-[44vh] min-h-[320px]"
+          }`}
+        >
           <div className="mx-auto grid w-full max-w-none flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
           <AnimatePresence mode="wait">
             {currentQ ? (
