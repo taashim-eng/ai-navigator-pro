@@ -196,7 +196,9 @@ function Navigator() {
             edges={edges}
             nodeTypes={nodeTypes}
             fitView
-            fitViewOptions={{ padding: 0.5 }}
+            fitViewOptions={{ padding: 1.2, minZoom: 0.3, maxZoom: 0.85 }}
+            minZoom={0.2}
+            maxZoom={1.5}
             proOptions={{ hideAttribution: true }}
             nodesDraggable
             zoomOnScroll
@@ -239,7 +241,7 @@ function Navigator() {
         </div>
 
         {/* Bottom dock: active question / chat */}
-        <aside className="flex max-h-[28vh] min-h-[180px] flex-col overflow-hidden border-t bg-card/30 px-4 py-3">
+        <aside className="flex max-h-[22vh] min-h-[150px] flex-col overflow-hidden border-t bg-card/30 px-4 py-2">
           <div className="mx-auto grid w-full max-w-none flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
           <AnimatePresence mode="wait">
             {currentQ ? (
