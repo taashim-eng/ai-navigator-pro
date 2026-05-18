@@ -231,8 +231,10 @@ function Navigator() {
                 if (k === "answer") return "oklch(0.85 0.04 258)";
                 return "oklch(0.6 0.15 258)";
               }}
+              nodeStrokeColor="oklch(0.55 0.2 258)"
               nodeStrokeWidth={3}
-              maskColor="oklch(0.95 0.01 258 / 0.6)"
+              nodeBorderRadius={4}
+              maskColor="oklch(0.55 0.2 258 / 0.08)"
             />
           </ReactFlow>
 
