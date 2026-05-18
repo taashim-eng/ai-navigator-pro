@@ -136,6 +136,7 @@ function contextualAdjustment(tool: ToolSeed, state: SessionState): number {
  * Apply hard filters: regulated/confidential data requires low risk rating.
  */
 function passesFilters(tool: ToolSeed, state: SessionState): boolean {
+  if (tool.excluded) return false;
   const sensitivity = state.answers.data_sensitivity;
   if (sensitivity === "regulated" && tool.riskRating !== "low") return false;
   return true;

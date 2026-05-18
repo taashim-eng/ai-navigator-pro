@@ -75,6 +75,7 @@ function Catalog() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((t, i) => {
             const R = RISK_META[t.riskRating];
+            const isExcluded = t.excluded;
             return (
               <motion.button
                 key={t.id}
@@ -82,7 +83,9 @@ function Catalog() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="group rounded-xl border bg-card p-5 text-left transition hover:shadow-[var(--shadow-elegant)]"
+                className={`group relative rounded-xl border bg-card p-5 text-left transition hover:shadow-[var(--shadow-elegant)] ${
+                  isExcluded ? "opacity-50 grayscale" : ""
+                }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -94,6 +97,16 @@ function Catalog() {
                   </div>
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">{t.description}</p>
+                {t.availability && (
+                  <div className="mt-3">
+                    <Badge
+                      variant={isExcluded ? "outline" : "default"}
+                      className="text-[10px]"
+                    >
+                      {t.availability}
+                    </Badge>
+                  </div>
+                )}
                 <div className="mt-4 flex flex-wrap gap-1">
                   {t.capabilities.slice(0, 4).map((c) => (
                     <Badge key={c} variant="secondary" className="text-[10px]">
@@ -128,6 +141,18 @@ function Catalog() {
               </Button>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">{active.description}</p>
+            {active.availability && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Badge variant={active.excluded ? "outline" : "default"} className="text-[10px]">
+                  {active.availability}
+                </Badge>
+                {active.deploymentOptions?.map((d) => (
+                  <Badge key={d} variant="secondary" className="text-[10px]">
+                    {d}
+                  </Badge>
+                ))}
+              </div>
+            )}
             <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
               <Field label="Risk" value={RISK_META[active.riskRating].label} />
               <Field label="Cost" value={active.costEstimate} />
