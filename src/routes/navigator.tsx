@@ -588,6 +588,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
   nodes.push({
     id: "root",
     type: "map",
+    width: 160,
+    height: 50,
     position: { x: xCenter, y },
     data: { label: "AI Solution Navigator", sub: "Start", kind: "prompt" } satisfies NodeData,
   });
@@ -601,6 +603,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id,
       type: "map",
+      width: 160,
+      height: 50,
       position: { x: xCenter, y },
       data: {
         label: `${state.identity.jobFunction} · ${state.identity.department}`,
@@ -622,6 +626,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id: qNodeId,
       type: "map",
+      width: 170,
+      height: 56,
       position: { x: xCenter - 110, y },
       data: { label: q.prompt, sub: q.category, kind: "question" },
     });
@@ -635,6 +641,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id: aNodeId,
       type: "map",
+      width: 170,
+      height: 56,
       position: { x: xCenter + 110, y },
       data: { label: labels.join(", "), sub: "Your answer", kind: "answer" },
     });
@@ -651,6 +659,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
       nodes.push({
         id: qNodeId,
         type: "map",
+        width: 170,
+        height: 56,
         position: { x: xCenter, y },
         data: { label: q.prompt, sub: q.category, kind: "question" },
       });
@@ -664,6 +674,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id: "rec",
       type: "map",
+      width: 180,
+      height: 60,
       position: { x: xCenter + 280, y: 0 },
       data: { label: top.tool.name, sub: "Live recommendation", kind: "rec" },
     });
