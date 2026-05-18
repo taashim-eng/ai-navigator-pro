@@ -226,15 +226,15 @@ function Navigator() {
               className="!bg-card !border-border"
               nodeColor={(n) => {
                 const k = (n.data as NodeData | undefined)?.kind;
-                if (k === "rec") return "oklch(0.55 0.2 258)";
-                if (k === "question") return "oklch(0.7 0.15 258)";
-                if (k === "answer") return "oklch(0.85 0.04 258)";
-                return "oklch(0.6 0.15 258)";
+                if (k === "rec") return "#2563eb";
+                if (k === "question") return "#60a5fa";
+                if (k === "answer") return "#cbd5e1";
+                return "#3b82f6";
               }}
-              nodeStrokeColor="oklch(0.55 0.2 258)"
+              nodeStrokeColor="#1d4ed8"
               nodeStrokeWidth={3}
               nodeBorderRadius={4}
-              maskColor="oklch(0.55 0.2 258 / 0.08)"
+              maskColor="rgba(37, 99, 235, 0.08)"
             />
           </ReactFlow>
 
