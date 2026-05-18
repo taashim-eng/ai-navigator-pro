@@ -211,8 +211,7 @@ function Navigator() {
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
-            fitView
-            fitViewOptions={{ padding: 1.2, minZoom: 0.3, maxZoom: 0.85 }}
+            defaultViewport={{ x: 480, y: 24, zoom: 0.85 }}
             minZoom={0.2}
             maxZoom={1.5}
             proOptions={{ hideAttribution: true }}
@@ -221,7 +220,22 @@ function Navigator() {
           >
             <Background gap={24} size={1} />
             <Controls position="bottom-left" />
-            <MiniMap pannable zoomable className="!bg-card !border-border" />
+            <MiniMap
+              pannable
+              zoomable
+              className="!bg-card !border-border"
+              nodeColor={(n) => {
+                const k = (n.data as NodeData | undefined)?.kind;
+                if (k === "rec") return "#2563eb";
+                if (k === "question") return "#60a5fa";
+                if (k === "answer") return "#cbd5e1";
+                return "#3b82f6";
+              }}
+              nodeStrokeColor="#1d4ed8"
+              nodeStrokeWidth={3}
+              nodeBorderRadius={4}
+              maskColor="rgba(37, 99, 235, 0.08)"
+            />
           </ReactFlow>
 
           {top && top.score > 0 && (
@@ -574,6 +588,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
   nodes.push({
     id: "root",
     type: "map",
+    width: 160,
+    height: 50,
     position: { x: xCenter, y },
     data: { label: "AI Solution Navigator", sub: "Start", kind: "prompt" } satisfies NodeData,
   });
@@ -587,6 +603,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id,
       type: "map",
+      width: 160,
+      height: 50,
       position: { x: xCenter, y },
       data: {
         label: `${state.identity.jobFunction} · ${state.identity.department}`,
@@ -608,6 +626,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id: qNodeId,
       type: "map",
+      width: 170,
+      height: 56,
       position: { x: xCenter - 110, y },
       data: { label: q.prompt, sub: q.category, kind: "question" },
     });
@@ -621,6 +641,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id: aNodeId,
       type: "map",
+      width: 170,
+      height: 56,
       position: { x: xCenter + 110, y },
       data: { label: labels.join(", "), sub: "Your answer", kind: "answer" },
     });
@@ -637,6 +659,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
       nodes.push({
         id: qNodeId,
         type: "map",
+        width: 170,
+        height: 56,
         position: { x: xCenter, y },
         data: { label: q.prompt, sub: q.category, kind: "question" },
       });
@@ -650,6 +674,8 @@ function buildGraph(state: SessionState, currentQid: string | null): { nodes: No
     nodes.push({
       id: "rec",
       type: "map",
+      width: 180,
+      height: 60,
       position: { x: xCenter + 280, y: 0 },
       data: { label: top.tool.name, sub: "Live recommendation", kind: "rec" },
     });
