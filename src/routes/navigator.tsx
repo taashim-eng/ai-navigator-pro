@@ -211,8 +211,7 @@ function Navigator() {
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
-            fitView
-            fitViewOptions={{ padding: 1.2, minZoom: 0.3, maxZoom: 0.85 }}
+            defaultViewport={{ x: 480, y: 24, zoom: 0.85 }}
             minZoom={0.2}
             maxZoom={1.5}
             proOptions={{ hideAttribution: true }}
@@ -221,7 +220,20 @@ function Navigator() {
           >
             <Background gap={24} size={1} />
             <Controls position="bottom-left" />
-            <MiniMap pannable zoomable className="!bg-card !border-border" />
+            <MiniMap
+              pannable
+              zoomable
+              className="!bg-card !border-border"
+              nodeColor={(n) => {
+                const k = (n.data as NodeData | undefined)?.kind;
+                if (k === "rec") return "oklch(0.55 0.2 258)";
+                if (k === "question") return "oklch(0.7 0.15 258)";
+                if (k === "answer") return "oklch(0.85 0.04 258)";
+                return "oklch(0.6 0.15 258)";
+              }}
+              nodeStrokeWidth={3}
+              maskColor="oklch(0.95 0.01 258 / 0.6)"
+            />
           </ReactFlow>
 
           {top && top.score > 0 && (
