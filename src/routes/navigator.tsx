@@ -188,9 +188,9 @@ function Navigator() {
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mind map (top) */}
-        <div className="relative flex-1 min-h-0">
+      <div className="flex flex-1 flex-row overflow-hidden">
+        {/* Mind map (left) */}
+        <div className="relative flex-1 min-w-0 min-h-0">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -240,15 +240,15 @@ function Navigator() {
           </div>
         </div>
 
-        {/* Bottom dock: active question / chat */}
+        {/* Right dock: active question / chat */}
         <aside
-          className={`flex flex-col overflow-hidden border-t bg-card/30 px-4 py-3 transition-[max-height,min-height] duration-300 ease-out ${
+          className={`flex h-full flex-col overflow-hidden border-l bg-card/30 px-4 py-3 transition-[width] duration-300 ease-out ${
             state.identity.email
-              ? "max-h-[35vh] min-h-[256px]"
-              : "max-h-[44vh] min-h-[320px]"
+              ? "w-[360px] shrink-0"
+              : "w-[420px] shrink-0"
           }`}
         >
-          <div className="mx-auto grid w-full max-w-none flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
+          <div className="flex w-full flex-1 flex-col gap-4 overflow-hidden">
           <AnimatePresence mode="wait">
             {currentQ ? (
               <motion.div
@@ -256,7 +256,7 @@ function Navigator() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-2"
+                className="flex shrink-0 flex-col gap-2 overflow-y-auto pr-1"
               >
                 <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
                   <MessageCircle className="h-3.5 w-3.5" /> Navigator · {currentQ.category}
@@ -271,7 +271,7 @@ function Navigator() {
                 key="done-prompt"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-2"
+                className="flex shrink-0 flex-col gap-2 overflow-y-auto pr-1"
               >
                 <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
                   <MessageCircle className="h-3.5 w-3.5" /> Navigator
