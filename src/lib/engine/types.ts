@@ -40,6 +40,12 @@ export interface ToolSeed {
   personas: string[];
   useCases: string[];
   complianceNotes: string;
+  /** How the tool is delivered to employees (e.g. "Available internally", "Bundled in Claude desktop app"). */
+  availability?: string;
+  /** Where it can be accessed in addition to the primary surface. */
+  deploymentOptions?: string[];
+  /** When true, the tool is shown in the catalog but greyed out and excluded from recommendations. */
+  excluded?: boolean;
 }
 
 export interface RankedTool {
