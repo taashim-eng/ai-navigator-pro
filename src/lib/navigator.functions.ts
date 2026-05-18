@@ -32,8 +32,33 @@ async function writeAudit(entry: AuditEntry) {
   }
 }
 
+/**
+ * Authorize a session-scoped request by matching the caller-supplied
+ * browser token against the value stored at startSession. Returns the
+ * session row on success, throws on failure.
+ *
+ * This is the only thing standing between any visitor with a session
+ * UUID and the PII / write access on that session, so failures must be
+ * opaque (no UUID-vs-token distinction).
+ */
+async function authorizeSession(sessionId: string, browserToken: string) {
+  const { data, error } = await supabaseAdmin
+    .from("sessions")
+    .select("id, browser_token, email, department, job_function, snow_user_sys_id, manager_email")
+    .eq("id", sessionId)
+    .maybeSingle();
+  if (error) throw new Error("Session lookup failed");
+  if (!data || !data.browser_token || data.browser_token !== browserToken) {
+    throw new Error("Unauthorized");
+  }
+  return data;
+}
+
+const tokenField = z.string().min(20).max(128);
+
 const identitySchema = z.object({
   sessionId: z.string().uuid(),
+  browserToken: tokenField,
   email: z.string().trim().email().max(255),
   department: z.string().trim().min(1).max(100),
   jobFunction: z.string().trim().min(1).max(100),
@@ -41,6 +66,7 @@ const identitySchema = z.object({
 
 const eventSchema = z.object({
   sessionId: z.string().uuid(),
+  browserToken: tokenField,
   nodeId: z.string().trim().min(1).max(120),
   questionId: z.string().trim().min(1).max(120),
   answerValue: z.unknown(),
@@ -48,6 +74,7 @@ const eventSchema = z.object({
 
 const finalizeSchema = z.object({
   sessionId: z.string().uuid(),
+  browserToken: tokenField,
   mainUseCase: z.string().trim().min(1).max(120),
   anticipatedBenefits: z.array(z.string().trim().min(1).max(60)).max(15),
   intentText: z.string().trim().max(2000).optional(),
@@ -68,9 +95,12 @@ const snowLookupSchema = z.object({
 });
 
 export const startSession = createServerFn({ method: "POST" }).handler(async () => {
+  // Opaque per-session secret. Caller must echo this on every follow-up
+  // call. Stored only server-side; never put in the URL.
+  const browserToken = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, "");
   const { data, error } = await supabaseAdmin
     .from("sessions")
-    .insert({})
+    .insert({ browser_token: browserToken })
     .select("id")
     .single();
   if (error) throw new Error(error.message);
@@ -80,12 +110,13 @@ export const startSession = createServerFn({ method: "POST" }).handler(async () 
     entityId: data.id as string,
     action: "create",
   });
-  return { sessionId: data.id as string };
+  return { sessionId: data.id as string, browserToken };
 });
 
 export const updateIdentity = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => identitySchema.parse(input))
   .handler(async ({ data }) => {
+    await authorizeSession(data.sessionId, data.browserToken);
     const snow = lookupSnowUserByEmail(data.email);
     const { error } = await supabaseAdmin
       .from("sessions")
@@ -131,6 +162,7 @@ export const lookupSnowUser = createServerFn({ method: "POST" })
 export const recordEvent = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => eventSchema.parse(input))
   .handler(async ({ data }) => {
+    await authorizeSession(data.sessionId, data.browserToken);
     const { error } = await supabaseAdmin.from("session_events").insert({
       session_id: data.sessionId,
       node_id: data.nodeId,
@@ -144,6 +176,7 @@ export const recordEvent = createServerFn({ method: "POST" })
 export const finalizeSession = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => finalizeSchema.parse(input))
   .handler(async ({ data }) => {
+    await authorizeSession(data.sessionId, data.browserToken);
     const { error: sErr } = await supabaseAdmin
       .from("sessions")
       .update({
@@ -273,9 +306,12 @@ export const finalizeSession = createServerFn({ method: "POST" })
 
 export const getResults = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
-    z.object({ sessionId: z.string().uuid() }).parse(input),
+    z
+      .object({ sessionId: z.string().uuid(), browserToken: tokenField })
+      .parse(input),
   )
   .handler(async ({ data }) => {
+    await authorizeSession(data.sessionId, data.browserToken);
     const [{ data: session }, { data: recs }, { data: tasks }] = await Promise.all([
       supabaseAdmin.from("sessions").select("*").eq("id", data.sessionId).maybeSingle(),
       supabaseAdmin
@@ -290,6 +326,11 @@ export const getResults = createServerFn({ method: "GET" })
         .order("created_at", { ascending: false })
         .limit(1),
     ]);
+    // Never leak the per-session token back to the client.
+    if (session && "browser_token" in session) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (session as any).browser_token;
+    }
     return {
       session,
       recommendations: recs ?? [],
