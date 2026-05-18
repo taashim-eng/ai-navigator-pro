@@ -126,6 +126,7 @@ export type Database = {
       sessions: {
         Row: {
           anticipated_benefits: string[] | null
+          browser_token: string | null
           completed_at: string | null
           created_at: string
           department: string | null
@@ -143,6 +144,7 @@ export type Database = {
         }
         Insert: {
           anticipated_benefits?: string[] | null
+          browser_token?: string | null
           completed_at?: string | null
           created_at?: string
           department?: string | null
@@ -160,6 +162,7 @@ export type Database = {
         }
         Update: {
           anticipated_benefits?: string[] | null
+          browser_token?: string | null
           completed_at?: string | null
           created_at?: string
           department?: string | null

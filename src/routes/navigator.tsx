@@ -83,6 +83,7 @@ function Navigator() {
   const snowLookupFn = useServerFn(lookupSnowUser);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [browserToken, setBrowserToken] = useState<string | null>(null);
   const [state, setState] = useState<SessionState>({
     sessionId: "",
     identity: {},
@@ -97,7 +98,13 @@ function Navigator() {
       .then((r) => {
         if (cancelled) return;
         setSessionId(r.sessionId);
+        setBrowserToken(r.browserToken);
         setState((s) => ({ ...s, sessionId: r.sessionId }));
+        try {
+          sessionStorage.setItem(`nav_token_${r.sessionId}`, r.browserToken);
+        } catch {
+          /* sessionStorage may be unavailable; results page will show empty state */
+        }
       })
       .catch(() => {});
     return () => {
@@ -118,10 +125,11 @@ function Navigator() {
 
   async function handleAnswer(qid: string, value: AnswerValue) {
     setState((s) => ({ ...s, answers: { ...s.answers, [qid]: value } }));
-    if (sessionId) {
+    if (sessionId && browserToken) {
       recordFn({
         data: {
           sessionId,
+          browserToken,
           nodeId: `q-${qid}`,
           questionId: qid,
           answerValue: value as never,
@@ -132,10 +140,17 @@ function Navigator() {
 
   async function handleIdentity(identity: SessionState["identity"]) {
     setState((s) => ({ ...s, identity: { ...s.identity, ...identity } }));
-    if (sessionId && identity.email && identity.department && identity.jobFunction) {
+    if (
+      sessionId &&
+      browserToken &&
+      identity.email &&
+      identity.department &&
+      identity.jobFunction
+    ) {
       updateIdFn({
         data: {
           sessionId,
+          browserToken,
           email: identity.email,
           department: identity.department,
           jobFunction: identity.jobFunction,
@@ -145,12 +160,13 @@ function Navigator() {
   }
 
   async function handleFinish() {
-    if (!sessionId || submitting) return;
+    if (!sessionId || !browserToken || submitting) return;
     setSubmitting(true);
     try {
       await finalizeFn({
         data: {
           sessionId,
+          browserToken,
           mainUseCase: String(state.answers.main_use_case ?? "general"),
           anticipatedBenefits: Array.isArray(state.answers.anticipated_benefits)
             ? (state.answers.anticipated_benefits as string[])

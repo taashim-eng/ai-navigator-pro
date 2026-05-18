@@ -39,10 +39,35 @@ const RISK = {
 function ResultsPage() {
   const { sessionId } = useParams({ from: "/results/$sessionId" });
   const fetchResults = useServerFn(getResults);
+  const browserToken =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem(`nav_token_${sessionId}`)
+      : null;
   const { data, isLoading } = useQuery({
-    queryKey: ["results", sessionId],
-    queryFn: () => fetchResults({ data: { sessionId } }),
+    queryKey: ["results", sessionId, browserToken],
+    queryFn: () =>
+      fetchResults({ data: { sessionId, browserToken: browserToken ?? "" } }),
+    enabled: Boolean(browserToken),
+    retry: false,
   });
+
+  if (!browserToken) {
+    return (
+      <div className="grid min-h-screen place-items-center px-6 text-center">
+        <div>
+          <h1 className="text-xl font-semibold">This result link is private</h1>
+          <p className="mt-2 max-w-md text-muted-foreground">
+            Recommendation summaries can only be opened from the browser that
+            created the session. Start a new request to see your tailored
+            recommendation.
+          </p>
+          <Button asChild className="mt-4">
+            <Link to="/navigator">Start a new request</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
