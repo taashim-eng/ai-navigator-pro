@@ -36,10 +36,12 @@ export const TOOLS: ToolSeed[] = [
   },
   {
     id: "claude-ai",
-    name: "Claude.ai",
+    name: "Claude.ai (web)",
     category: "General reasoning",
     description:
-      "Anthropic's flagship assistant for long-context analysis, writing and reasoning.",
+      "Anthropic's flagship assistant for long-context analysis, writing and reasoning. Available standalone in the browser and bundled in the Claude desktop app.",
+    availability: "Available internally",
+    deploymentOptions: ["Web (claude.ai)", "Bundled in Claude desktop app"],
     capabilities: [
       "document_generation",
       "summarization",
@@ -59,10 +61,12 @@ export const TOOLS: ToolSeed[] = [
   },
   {
     id: "claude-code",
-    name: "Claude Code (desktop)",
+    name: "Claude Code (CLI)",
     category: "Developer tooling",
     description:
-      "Agentic coding assistant that operates on local repositories from the terminal / desktop.",
+      "Agentic coding assistant that operates on local repositories from the terminal. Deployable standalone as a CLI or bundled in the Claude desktop app.",
+    availability: "Available internally",
+    deploymentOptions: ["Standalone CLI", "Bundled in Claude desktop app"],
     capabilities: ["coding", "agentic_coding", "refactoring", "code_review", "automation", "testing"],
     riskRating: "medium",
     licensing: "Pro / Team subscription",
@@ -76,7 +80,10 @@ export const TOOLS: ToolSeed[] = [
     id: "chatgpt",
     name: "ChatGPT",
     category: "General assistant",
-    description: "OpenAI's general-purpose assistant for writing, brainstorming and analysis.",
+    description:
+      "OpenAI's general-purpose assistant for writing, brainstorming and analysis. Reachable via SharePoint and the Pulse platform.",
+    availability: "Available internally",
+    deploymentOptions: ["SharePoint site", "Pulse platform"],
     capabilities: [
       "document_generation",
       "summarization",
@@ -112,7 +119,10 @@ export const TOOLS: ToolSeed[] = [
     id: "claude-chatbot",
     name: "Claude (chatbot)",
     category: "Conversational assistant",
-    description: "Conversational Claude experience for business users — Q&A, writing, summarization.",
+    description:
+      "Conversational Claude experience for business users — Q&A, writing, summarization. Reachable via SharePoint and the Pulse platform.",
+    availability: "Available internally",
+    deploymentOptions: ["SharePoint site", "Pulse platform"],
     capabilities: ["summarization", "writing", "research", "customer_support", "conversational"],
     riskRating: "medium",
     licensing: "Team / Enterprise",
@@ -127,6 +137,8 @@ export const TOOLS: ToolSeed[] = [
     name: "Amazon Q",
     category: "AWS-aware assistant",
     description: "Assistant tuned for AWS environments and business data on AWS.",
+    availability: "Not yet approved",
+    excluded: true,
     capabilities: ["analytics", "coding", "automation", "aws_operations", "data_science"],
     riskRating: "low",
     licensing: "Per user / month (Business or Developer)",
@@ -141,6 +153,8 @@ export const TOOLS: ToolSeed[] = [
     name: "Gemini Enterprise",
     category: "Enterprise productivity",
     description: "Google's enterprise assistant integrated with Workspace and multimodal inputs.",
+    availability: "Not yet approved",
+    excluded: true,
     capabilities: [
       "document_generation",
       "summarization",
@@ -163,6 +177,8 @@ export const TOOLS: ToolSeed[] = [
     name: "Perplexity",
     category: "Research",
     description: "AI search with cited sources for fast, verifiable research.",
+    availability: "Not yet approved",
+    excluded: true,
     capabilities: ["research", "summarization", "citations", "web_search"],
     riskRating: "medium",
     licensing: "Pro / Enterprise plans",
