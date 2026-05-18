@@ -256,7 +256,7 @@ function Navigator() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-2"
+                className="flex shrink-0 flex-col gap-2 overflow-y-auto pr-1"
               >
                 <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
                   <MessageCircle className="h-3.5 w-3.5" /> Navigator · {currentQ.category}
@@ -271,7 +271,7 @@ function Navigator() {
                 key="done-prompt"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-2"
+                className="flex shrink-0 flex-col gap-2 overflow-y-auto pr-1"
               >
                 <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
                   <MessageCircle className="h-3.5 w-3.5" /> Navigator
